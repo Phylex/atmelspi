@@ -122,14 +122,14 @@ int usi_packet_write(uint8_t data[], uint8_t start, uint8_t size)	//TODO EXPAND 
 	}
 	// if the buffer is empty then the clock has to be restarted 
 	if(usi_status&(1<<USIBUFFEREMPTY)){
-		TCNT0=0;
-		usi_status&=~(1<<USIBUFFEREMPTY);
-		PORTA&=~(1<<3);
-		USIDR=usi_data_mosi[k];
-		TCCR0B|= (1<<USICLKRANGE);
+		TCNT0=0;				// Stop Timer
+		usi_status&=~(1<<USIBUFFEREMPTY);	// clear buffer Empty flags
+		PORTA&=~(1<<3);				// Pull SS line low
+		USIDR=usi_data_mosi[k];			// fill the output register of the USI
+		TCCR0B|= (1<<USICLKRANGE);		// Start up the timer again to shift out packet
 		if(size>1){
 			usi_status|=(1<<USIPACKETSENDING);
-			usi_packet_selector=i;
+			usi_packet_selector=i;		// Set the Packet selector
 			usi_next_byte_indicator=k+1;
 		}
 		usi_byte_sent++;
